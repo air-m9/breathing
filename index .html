@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正念呼吸 - 找回内心的平静</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#60A5FA',
+                        accent: '#93C5FD',
+                        neutral: '#EFF6FF',
+                        dark: '#1E3A8A'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'breathe-in': 'breatheIn 4s ease-in-out',
+                        'breathe-hold': 'breatheHold 7s ease-in-out',
+                        'breathe-out': 'breatheOut 8s ease-in-out',
+                        'breathe-rest': 'breatheRest 4s ease-in-out',
+                    },
+                    keyframes: {
+                        breatheIn: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0.7' },
+                            '100%': { transform: 'scale(1.2)', opacity: '1' }
+                        },
+                        breatheHold: {
+                            '0%': { transform: 'scale(1.2)', opacity: '1' },
+                            '100%': { transform: 'scale(1.2)', opacity: '1' }
+                        },
+                        breatheOut: {
+                            '0%': { transform: 'scale(1.2)', opacity: '1' },
+                            '100%': { transform: 'scale(0.8)', opacity: '0.7' }
+                        },
+                        breatheRest: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0.7' },
+                            '100%': { transform: 'scale(0.8)', opacity: '0.7' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .bg-gradient-calm {
+                background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+        }
+    </style>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .breathing-circle {
+            transition: transform 0.3s ease;
+        }
+        
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg"><path fill="%233B82F6" fill-opacity="0.2" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: 1440px 100px;
+            animation: wave 10s linear infinite;
+        }
+        
+        .wave:nth-child(2) {
+            bottom: 10px;
+            opacity: 0.5;
+            animation: wave 7s linear infinite;
+        }
+        
+        .wave:nth-child(3) {
+            bottom: 20px;
+            opacity: 0.3;
+            animation: wave 5s linear infinite;
+        }
+        
+        @keyframes wave {
+            0% {
+                background-position-x: 0;
+            }
+            100% {
+                background-position-x: 1440px;
+            }
+        }
+        
+        .settings-panel {
+            transform: translateY(100%);
+            transition: transform 0.4s ease-out;
+        }
+        
+        .settings-panel.active {
+            transform: translateY(0);
+        }
+        
+        .stats-panel {
+            transform: translateX(-100%);
+            transition: transform 0.4s ease-out;
+        }
+        
+        .stats-panel.active {
+            transform: translateX(0);
+        }
+        
+        .breathe-animation {
+            animation-duration: var(--animation-duration, 19s);
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+        
+        @keyframes breatheCycle {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            21% { transform: scale(1.2); opacity: 1; } /* 4s inhale */
+            58% { transform: scale(1.2); opacity: 1; } /* 7s hold */
+            100% { transform: scale(0.8); opacity: 0.7; } /* 8s exhale */
+        }
+        
+        @keyframes breatheCycle444 {
+            0% { 
+                transform: scale(0.8); 
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+            25% { 
+                transform: scale(1.2); 
+                opacity: 1;
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            } /* 4s inhale */
+            50% { 
+                transform: scale(1.2); 
+                opacity: 1;
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            } /* 4s hold */
+            75% { 
+                transform: scale(0.8); 
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            } /* 4s exhale */
+            100% { 
+                transform: scale(0.8); 
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            } /* 4s rest */
+        }
+        
+        @keyframes breatheCycle478 {
+            0% { 
+                transform: scale(0.8); 
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+            21% { 
+                transform: scale(1.2); 
+                opacity: 1;
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            } /* 4s inhale */
+            58% { 
+                transform: scale(1.2); 
+                opacity: 1;
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            } /* 7s hold */
+            100% { 
+                transform: scale(0.8); 
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            } /* 8s exhale */
+        }
+        
+        @keyframes breatheCycleBox {
+            0% { 
+                transform: scale(0.8); 
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+            25% { 
+                transform: scale(1.2); 
+                opacity: 1;
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            } /* 4s inhale */
+            50% { 
+                transform: scale(1.2); 
+                opacity: 1;
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            } /* 4s hold */
+            75% { 
+                transform: scale(0.8); 
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            } /* 4s exhale */
+            100% { 
+                transform: scale(0.8); 
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            } /* 4s rest */
+        }
+        
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1E3A8A;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gradient-calm min-h-screen">
+    <!-- 背景动画 -->
+    <div class="background-animation">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8 max-w-md relative">
+        <!-- 顶部导航 -->
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold text-dark text-shadow">正念呼吸</h1>
+            <div class="flex space-x-4">
+                <button id="statsBtn" class="p-2 rounded-full bg-white/80 shadow-md hover:bg-white transition-all-300">
+                    <i class="fa fa-bar-chart text-primary"></i>
+                </button>
+                <button id="settingsBtn" class="p-2 rounded-full bg-white/80 shadow-md hover:bg-white transition-all-300">
+                    <i class="fa fa-cog text-primary"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主要内容区 -->
+        <main class="flex flex-col items-center justify-center min-h-[60vh]">
+            <!-- 呼吸引导圆形 -->
+            <div class="relative mb-12 w-full flex justify-center">
+                <div class="relative w-64 h-64">
+                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                        <circle class="progress-ring__circle" stroke="#DBEAFE" stroke-width="4" fill="transparent" r="48" cx="50" cy="50"/>
+                    </svg>
+                    <div id="breathingCircle" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-gradient-to-br from-primary to-secondary opacity-80 breathe-animation shadow-lg" style="animation-name: breatheCycle478;"></div>
+                </div>
+            </div>
+
+            <!-- 呼吸状态指示 -->
+            <div class="text-center mb-8 relative z-10">
+                <p id="breathText" class="text-2xl font-medium text-dark mb-2 text-shadow">准备开始</p>
+                <p id="breathInstructions" class="text-lg text-gray-700 text-shadow">跟随圆圈的节奏，放松身心</p>
+                <p id="countdownTimer" class="text-4xl font-bold text-primary mt-4 opacity-0">3</p>
+            </div>
+
+            <!-- 控制按钮 -->
+            <div class="flex justify-center items-center w-full relative z-30">
+                <div class="relative w-[120px] h-[50px]">
+                    <button id="startBtn" class="absolute inset-0 px-8 py-3 bg-primary text-white rounded-full shadow-lg hover:bg-dark transition-all-300 flex items-center justify-center z-20">
+                        <i class="fa fa-play mr-2"></i> 开始
+                    </button>
+                    <button id="pauseBtn" class="absolute inset-0 px-8 py-3 bg-white/80 text-primary rounded-full shadow-lg hover:bg-white transition-all-300 flex items-center justify-center opacity-0 pointer-events-none z-30">
+                        <i class="fa fa-stop mr-2"></i> 结束
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部信息 -->
+        <footer class="mt-auto text-center text-sm text-gray-500">
+            <p>今天也要好好照顾自己 ❤️</p>
+        </footer>
+    </div>
+
+    <!-- 设置面板 -->
+    <div id="settingsPanel" class="settings-panel fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl p-6 z-50">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-dark">设置</h2>
+            <button id="closeSettingsBtn" class="p-2 rounded-full hover:bg-gray-100">
+                <i class="fa fa-times text-gray-500"></i>
+            </button>
+        </div>
+
+        <div class="space-y-6">
+            <!-- 呼吸模式选择 -->
+            <div>
+                <h3 class="text-lg font-medium text-dark mb-3">呼吸模式</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="breathing-mode-btn bg-primary/10 border-2 border-primary text-primary rounded-xl p-4 text-center hover:bg-primary/20 transition-all-300" data-mode="478" data-inhale="4" data-hold="7" data-exhale="8" data-rest="0">
+                        <div class="font-bold">4-7-8 法</div>
+                        <div class="text-sm opacity-80">吸气4秒，屏息7秒，呼气8秒</div>
+                    </button>
+                    <button class="breathing-mode-btn bg-white border-2 border-gray-200 text-gray-700 rounded-xl p-4 text-center hover:bg-gray-50 transition-all-300" data-mode="444" data-inhale="4" data-hold="4" data-exhale="4" data-rest="4">
+                        <div class="font-bold">平衡呼吸</div>
+                        <div class="text-sm opacity-80">吸气4秒，屏息4秒，呼气4秒，休息4秒</div>
+                    </button>
+                    <button class="breathing-mode-btn bg-white border-2 border-gray-200 text-gray-700 rounded-xl p-4 text-center hover:bg-gray-50 transition-all-300" data-mode="box" data-inhale="4" data-hold="4" data-exhale="4" data-rest="4">
+                        <div class="font-bold">箱式呼吸</div>
+                        <div class="text-sm opacity-80">四方形呼吸，各4秒</div>
+                    </button>
+                    <button class="breathing-mode-btn bg-white border-2 border-gray-200 text-gray-700 rounded-xl p-4 text-center hover:bg-gray-50 transition-all-300" data-mode="custom" data-inhale="4" data-hold="4" data-exhale="4" data-rest="0">
+                        <div class="font-bold">自定义</div>
+                        <div class="text-sm opacity-80">根据需要调整节奏</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 自定义呼吸节奏 -->
+            <div id="customBreathingSettings" class="hidden">
+                <h3 class="text-lg font-medium text-dark mb-3">自定义呼吸节奏（秒）</h3>
+                <div class="grid grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-sm text-gray-500 mb-1">吸气</label>
+                        <input type="number" id="customInhale" min="1" max="10" value="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-500 mb-1">屏息</label>
+                        <input type="number" id="customHold" min="0" max="10" value="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-500 mb-1">呼气</label>
+                        <input type="number" id="customExhale" min="1" max="10" value="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-500 mb-1">休息</label>
+                        <input type="number" id="customRest" min="0" max="10" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-center">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 会话时长 -->
+            <div>
+                <h3 class="text-lg font-medium text-dark mb-3">会话时长（分钟）</h3>
+                <div class="flex items-center">
+                    <input type="range" id="sessionDuration" min="1" max="30" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <span id="sessionDurationValue" class="ml-3 text-lg font-medium text-primary min-w-[2rem] text-center">5</span>
+                </div>
+            </div>
+
+            <!-- 背景音效 -->
+            <div>
+                <h3 class="text-lg font-medium text-dark mb-3">背景音效</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="sound-btn bg-white border-2 border-gray-200 text-gray-700 rounded-xl p-3 text-center hover:bg-gray-50 transition-all-300" data-sound="none">
+                        <i class="fa fa-volume-off mr-2"></i> 无音效
+                    </button>
+                    <button class="sound-btn bg-primary/10 border-2 border-primary text-primary rounded-xl p-3 text-center hover:bg-primary/20 transition-all-300" data-sound="ocean">
+                        <i class="fa fa-tint mr-2"></i> 海浪声
+                    </button>
+                    <button class="sound-btn bg-white border-2 border-gray-200 text-gray-700 rounded-xl p-3 text-center hover:bg-gray-50 transition-all-300" data-sound="rain">
+                        <i class="fa fa-cloud-rain mr-2"></i> 雨声
+                    </button>
+                    <button class="sound-btn bg-white border-2 border-gray-200 text-gray-700 rounded-xl p-3 text-center hover:bg-gray-50 transition-all-300" data-sound="forest">
+                        <i class="fa fa-tree mr-2"></i> 森林声
+                    </button>
+                </div>
+            </div>
+
+            <!-- 声音大小 -->
+            <div>
+                <h3 class="text-lg font-medium text-dark mb-3">声音大小</h3>
+                <div class="flex items-center">
+                    <input type="range" id="soundVolume" min="0" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <span id="soundVolumeValue" class="ml-3 text-lg font-medium text-primary min-w-[3rem] text-center">50%</span>
+                </div>
+            </div>
+
+            <!-- 保存按钮 -->
+            <button id="saveSettingsBtn" class="w-full py-3 bg-primary text-white rounded-full shadow-lg hover:bg-dark transition-all-300 mt-4">
+                保存设置
+            </button>
+        </div>
+    </div>
+
+    <!-- 统计面板 -->
+    <div id="statsPanel" class="stats-panel fixed top-0 left-0 bottom-0 w-64 bg-white shadow-2xl p-6 z-50 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-dark">统计</h2>
+            <button id="closeStatsBtn" class="p-2 rounded-full hover:bg-gray-100">
+                <i class="fa fa-times text-gray-500"></i>
+            </button>
+        </div>
+
+        <div class="space-y-6">
+            <!-- 今日统计 -->
+            <div class="bg-neutral rounded-xl p-4">
+                <h3 class="text-lg font-medium text-dark mb-3">今日</h3>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-600">次数</span>
+                    <span id="todaySessions" class="text-xl font-bold text-primary">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">时长</span>
+                    <span id="todayMinutes" class="text-xl font-bold text-primary">0 分钟</span>
+                </div>
+            </div>
+
+            <!-- 本周统计 -->
+            <div class="bg-neutral rounded-xl p-4">
+                <h3 class="text-lg font-medium text-dark mb-3">本周</h3>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-600">次数</span>
+                    <span id="weekSessions" class="text-xl font-bold text-primary">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">时长</span>
+                    <span id="weekMinutes" class="text-xl font-bold text-primary">0 分钟</span>
+                </div>
+            </div>
+
+            <!-- 总计统计 -->
+            <div class="bg-neutral rounded-xl p-4">
+                <h3 class="text-lg font-medium text-dark mb-3">总计</h3>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-600">次数</span>
+                    <span id="totalSessions" class="text-xl font-bold text-primary">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">时长</span>
+                    <span id="totalMinutes" class="text-xl font-bold text-primary">0 分钟</span>
+                </div>
+            </div>
+
+            <!-- 连续天数 -->
+            <div class="bg-neutral rounded-xl p-4">
+                <h3 class="text-lg font-medium text-dark mb-3">连续天数</h3>
+                <div class="flex justify-center">
+                    <div class="text-4xl font-bold text-primary" id="streakDays">0</div>
+                </div>
+                <div class="text-center text-sm text-gray-500 mt-1">天</div>
+            </div>
+
+            <!-- 最近7天 -->
+            <div>
+                <h3 class="text-lg font-medium text-dark mb-3">最近7天</h3>
+                <div class="h-40">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 成就 -->
+            <div>
+                <h3 class="text-lg font-medium text-dark mb-3">成就</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="achievement bg-white border border-gray-200 rounded-xl p-3 text-center opacity-50">
+                        <div class="text-2xl mb-1"><i class="fa fa-star text-yellow-400"></i></div>
+                        <div class="text-xs">初学者</div>
+                        <div class="text-xs text-gray-500">完成5次练习</div>
+                    </div>
+                    <div class="achievement bg-white border border-gray-200 rounded-xl p-3 text-center opacity-50">
+                        <div class="text-2xl mb-1"><i class="fa fa-calendar-check-o text-green-500"></i></div>
+                        <div class="text-xs">坚持一周</div>
+                        <div class="text-xs text-gray-500">连续7天练习</div>
+                    </div>
+                    <div class="achievement bg-white border border-gray-200 rounded-xl p-3 text-center opacity-50">
+                        <div class="text-2xl mb-1"><i class="fa fa-clock-o text-blue-500"></i></div>
+                        <div class="text-xs">专注大师</div>
+                        <div class="text-xs text-gray-500">累计练习3小时</div>
+                    </div>
+                    <div class="achievement bg-white border border-gray-200 rounded-xl p-3 text-center opacity-50">
+                        <div class="text-2xl mb-1"><i class="fa fa-trophy text-yellow-600"></i></div>
+                        <div class="text-xs">冥想达人</div>
+                        <div class="text-xs text-gray-500">完成30次练习</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 完成会话弹窗 -->
+    <div id="sessionCompleteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa fa-check text-3xl text-green-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-dark mb-2">会话完成</h2>
+                <p class="text-gray-600 mb-4">你已完成 <span id="completedMinutes">5</span> 分钟的正念呼吸练习</p>
+                <div class="bg-neutral rounded-xl p-4 mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">本周进度</span>
+                        <span id="weeklyProgress" class="font-medium text-primary">1/7 天</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="weeklyProgressBar" class="bg-primary h-2.5 rounded-full" style="width: 14%"></div>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="closeModalBtn" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-full shadow hover:bg-gray-200 transition-all-300">
+                        完成
+                    </button>
+                    <button id="shareSessionBtn" class="flex-1 py-3 bg-primary text-white rounded-full shadow hover:bg-dark transition-all-300">
+                        分享
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示弹窗 -->
+    <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-dark text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 z-50">
+        设置已保存
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+    <script>
+        // 全局变量
+        let breathingState = 'ready'; // ready, inhale, hold, exhale, rest
+        let breathingInterval;
+        let countdownInterval;
+        let sessionTimer;
+        let sessionStartTime;
+        let sessionDuration = 5 * 60 * 1000; // 默认5分钟
+        let currentMode = '478';
+        let breathingPattern = {
+            inhale: 4,
+            hold: 7,
+            exhale: 8,
+            rest: 0
+        };
+        let soundEnabled = 'ocean';
+        let soundVolume = 50;
+        let isSessionActive = false;
+        
+        // DOM 元素
+        const breathingCircle = document.getElementById('breathingCircle');
+        const breathText = document.getElementById('breathText');
+        const breathInstructions = document.getElementById('breathInstructions');
+        const countdownTimer = document.getElementById('countdownTimer');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const statsBtn = document.getElementById('statsBtn');
+        const closeStatsBtn = document.getElementById('closeStatsBtn');
+        const statsPanel = document.getElementById('statsPanel');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const customBreathingSettings = document.getElementById('customBreathingSettings');
+        const sessionDurationSlider = document.getElementById('sessionDuration');
+        const sessionDurationValue = document.getElementById('sessionDurationValue');
+        const soundVolumeSlider = document.getElementById('soundVolume');
+        const soundVolumeValue = document.getElementById('soundVolumeValue');
+        const sessionCompleteModal = document.getElementById('sessionCompleteModal');
+        const completedMinutes = document.getElementById('completedMinutes');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const shareSessionBtn = document.getElementById('shareSessionBtn');
+        const toast = document.getElementById('toast');
+        const weeklyChart = document.getElementById('weeklyChart');
+        
+        // 统计数据
+        let stats = {
+            today: {
+                sessions: 0,
+                minutes: 0
+            },
+            week: {
+                sessions: 0,
+                minutes: 0
+            },
+            total: {
+                sessions: 0,
+                minutes: 0
+            },
+            streak: 0,
+            dailyData: Array(7).fill(0)
+        };
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载设置
+            loadSettings();
+            
+            // 加载统计数据
+            loadStats();
+            
+            // 初始化图表
+            initChart();
+            
+            // 更新统计显示
+            updateStatsDisplay();
+            
+            // 绑定事件
+            bindEvents();
+        });
+        
+        // 绑定事件
+        function bindEvents() {
+            // 开始按钮
+            startBtn.addEventListener('click', startBreathing);
+            
+            // 暂停按钮
+            pauseBtn.addEventListener('click', endSession);
+            
+            // 设置按钮
+            settingsBtn.addEventListener('click', toggleSettings);
+            closeSettingsBtn.addEventListener('click', toggleSettings);
+            
+            // 统计按钮
+            statsBtn.addEventListener('click', toggleStats);
+            closeStatsBtn.addEventListener('click', toggleStats);
+            
+            // 保存设置按钮
+            saveSettingsBtn.addEventListener('click', saveSettings);
+            
+            // 会话完成弹窗
+            closeModalBtn.addEventListener('click', closeSessionModal);
+            shareSessionBtn.addEventListener('click', shareSession);
+            
+            // 呼吸模式按钮
+            document.querySelectorAll('.breathing-mode-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的选中状态
+                    document.querySelectorAll('.breathing-mode-btn').forEach(b => {
+                        b.classList.remove('bg-primary/10', 'border-primary', 'text-primary');
+                        b.classList.add('bg-white', 'border-gray-200', 'text-gray-700');
+                    });
+                    
+                    // 添加当前按钮的选中状态
+                    this.classList.remove('bg-white', 'border-gray-200', 'text-gray-700');
+                    this.classList.add('bg-primary/10', 'border-primary', 'text-primary');
+                    
+                    // 获取模式数据
+                    const mode = this.dataset.mode;
+                    currentMode = mode;
+                    
+                    // 如果是自定义模式，显示自定义设置
+                    if (mode === 'custom') {
+                        customBreathingSettings.classList.remove('hidden');
+                    } else {
+                        customBreathingSettings.classList.add('hidden');
+                        
+                        // 更新呼吸模式
+                        breathingPattern = {
+                            inhale: parseInt(this.dataset.inhale),
+                            hold: parseInt(this.dataset.hold),
+                            exhale: parseInt(this.dataset.exhale),
+                            rest: parseInt(this.dataset.rest)
+                        };
+                    }
+                    
+                    // 更新动画
+                    updateBreathingAnimation();
+                });
+            });
+            
+            // 自定义呼吸设置
+            document.getElementById('customInhale').addEventListener('change', updateCustomBreathing);
+            document.getElementById('customHold').addEventListener('change', updateCustomBreathing);
+            document.getElementById('customExhale').addEventListener('change', updateCustomBreathing);
+            document.getElementById('customRest').addEventListener('change', updateCustomBreathing);
+            
+            // 会话时长滑块
+            sessionDurationSlider.addEventListener('input', function() {
+                sessionDurationValue.textContent = this.value;
+                sessionDuration = parseInt(this.value) * 60 * 1000;
+            });
+            
+            // 声音大小滑块
+            soundVolumeSlider.addEventListener('input', function() {
+                soundVolumeValue.textContent = this.value + '%';
+                soundVolume = parseInt(this.value);
+            });
+            
+            // 背景音效按钮
+            document.querySelectorAll('.sound-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的选中状态
+                    document.querySelectorAll('.sound-btn').forEach(b => {
+                        b.classList.remove('bg-primary/10', 'border-primary', 'text-primary');
+                        b.classList.add('bg-white', 'border-gray-200', 'text-gray-700');
+                    });
+                    
+                    // 添加当前按钮的选中状态
+                    this.classList.remove('bg-white', 'border-gray-200', 'text-gray-700');
+                    this.classList.add('bg-primary/10', 'border-primary', 'text-primary');
+                    
+                    // 更新音效设置
+                    soundEnabled = this.dataset.sound;
+                });
+            });
+        }
+        
+        // 更新自定义呼吸设置
+        function updateCustomBreathing() {
+            breathingPattern = {
+                inhale: parseInt(document.getElementById('customInhale').value) || 4,
+                hold: parseInt(document.getElementById('customHold').value) || 4,
+                exhale: parseInt(document.getElementById('customExhale').value) || 4,
+                rest: parseInt(document.getElementById('customRest').value) || 0
+            };
+            
+            // 更新动画
+            updateBreathingAnimation();
+        }
+        
+        // 更新呼吸动画
+        function updateBreathingAnimation() {
+            if (!isSessionActive) return;
+            
+            // 清除当前动画
+            breathingCircle.style.animation = 'none';
+            
+            // 强制重绘
+            void breathingCircle.offsetWidth;
+            
+            // 计算总时长
+            const totalDuration = breathingPattern.inhale + breathingPattern.hold + breathingPattern.exhale + breathingPattern.rest;
+            
+            // 设置动画名称
+            let animationName = 'breatheCycle';
+            
+            // 根据模式设置动画
+            switch (currentMode) {
+                case '444':
+                    animationName = 'breatheCycle444';
+                    break;
+                case '478':
+                    animationName = 'breatheCycle478';
+                    break;
+                case 'box':
+                    animationName = 'breatheCycleBox';
+                    break;
+                case 'custom':
+                    // 创建自定义动画
+                    const keyframes = `
+                        @keyframes customBreathing {
+                            0% { transform: scale(0.8); opacity: 0.7; }
+                            ${(breathingPattern.inhale / totalDuration) * 100}% { transform: scale(1.2); opacity: 1; }
+                            ${((breathingPattern.inhale + breathingPattern.hold) / totalDuration) * 100}% { transform: scale(1.2); opacity: 1; }
+                            ${((breathingPattern.inhale + breathingPattern.hold + breathingPattern.exhale) / totalDuration) * 100}% { transform: scale(0.8); opacity: 0.7; }
+                            100% { transform: scale(0.8); opacity: 0.7; }
+                        }
+                    `;
+                    
+                    // 添加样式
+                    const style = document.createElement('style');
+                    style.textContent = keyframes;
+                    document.head.appendChild(style);
+                    
+                    animationName = 'customBreathing';
+                    break;
+            }
+            
+            // 设置新动画
+            breathingCircle.style.animation = `${animationName} ${totalDuration}s linear infinite`;
+        }
+        
+        // 开始呼吸
+        function startBreathing() {
+            if (isSessionActive) return;
+            
+            isSessionActive = true;
+            
+            // 隐藏开始按钮，显示暂停按钮
+            startBtn.classList.add('opacity-0', 'pointer-events-none');
+            pauseBtn.classList.remove('opacity-0', 'pointer-events-none');
+            
+            // 显示倒计时
+            countdownTimer.classList.remove('opacity-0');
+            countdownTimer.textContent = '3';
+            
+            let countdown = 3;
+            
+            // 倒计时
+            countdownInterval = setInterval(() => {
+                countdown--;
+                
+                if (countdown > 0) {
+                    countdownTimer.textContent = countdown;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownTimer.classList.add('opacity-0');
+                    
+                    // 开始呼吸循环
+                    startBreathingCycle();
+                    
+                    // 开始会话计时器
+                    sessionStartTime = Date.now();
+                    sessionTimer = setTimeout(() => {
+                        endSession();
+                    }, sessionDuration);
+                }
+            }, 1000);
+        }
+        
+        // 获取当前状态持续时间
+        function getCurrentStateDuration() {
+            switch (breathingState) {
+                case 'inhale':
+                    return breathingPattern.inhale;
+                case 'hold':
+                    return breathingPattern.hold;
+                case 'exhale':
+                    return breathingPattern.exhale;
+                case 'rest':
+                    return breathingPattern.rest;
+                default:
+                    return breathingPattern.inhale;
+            }
+        }
+        
+        // 结束会话
+        function endSession() {
+            if (!isSessionActive) return;
+            
+            isSessionActive = false;
+            isPaused = false;
+            
+            // 清除所有计时器
+            clearInterval(breathingInterval);
+            clearInterval(countdownInterval);
+            clearTimeout(sessionTimer);
+            
+            // 重置状态
+            breathingState = 'ready';
+            breathText.textContent = '准备开始';
+            breathInstructions.textContent = '跟随圆圈的节奏，放松身心';
+            
+            // 重置按钮
+            startBtn.classList.remove('opacity-0', 'pointer-events-none');
+            pauseBtn.classList.add('opacity-0', 'pointer-events-none');
+            
+            // 重置动画
+            breathingCircle.style.animation = 'none';
+            breathingCircle.style.animationPlayState = 'running';
+            
+            // 计算实际时长
+            const actualDuration = Math.round((Date.now() - sessionStartTime) / (1000 * 60));
+            
+            // 更新统计
+            updateStats(actualDuration);
+            
+            // 显示完成弹窗
+            completedMinutes.textContent = actualDuration;
+            showSessionModal();
+        }
+        
+        // 开始呼吸循环
+        function startBreathingCycle() {
+            let stateIndex = 0;
+            const states = [
+                { state: 'inhale', text: '吸气', instructions: `缓慢吸气 ${breathingPattern.inhale} 秒`, duration: breathingPattern.inhale * 1000 },
+                { state: 'hold', text: '屏息', instructions: `保持呼吸 ${breathingPattern.hold} 秒`, duration: breathingPattern.hold * 1000 },
+                { state: 'exhale', text: '呼气', instructions: `缓慢呼气 ${breathingPattern.exhale} 秒`, duration: breathingPattern.exhale * 1000 }
+            ];
+            
+            // 如果有休息阶段，添加到状态中
+            if (breathingPattern.rest > 0) {
+                states.push({ state: 'rest', text: '休息', instructions: `自然呼吸 ${breathingPattern.rest} 秒`, duration: breathingPattern.rest * 1000 });
+            }
+            
+            // 更新呼吸动画
+            updateBreathingAnimation();
+            
+            // 更新初始状态
+            updateBreathingState(states[stateIndex]);
+        }
+        
+        // 更新呼吸状态
+        function updateBreathingState(state) {
+            breathingState = state.state;
+            breathText.textContent = state.text;
+            breathInstructions.textContent = state.instructions;
+            
+            // 清除当前间隔
+            clearInterval(breathingInterval);
+            
+            // 设置新间隔
+            breathingInterval = setInterval(() => {
+                const states = [
+                    { state: 'inhale', text: '吸气', instructions: `缓慢吸气 ${breathingPattern.inhale} 秒`, duration: breathingPattern.inhale * 1000 },
+                    { state: 'hold', text: '屏息', instructions: `保持呼吸 ${breathingPattern.hold} 秒`, duration: breathingPattern.hold * 1000 },
+                    { state: 'exhale', text: '呼气', instructions: `缓慢呼气 ${breathingPattern.exhale} 秒`, duration: breathingPattern.exhale * 1000 }
+                ];
+                
+                // 如果有休息阶段，添加到状态中
+                if (breathingPattern.rest > 0) {
+                    states.push({ state: 'rest', text: '休息', instructions: `自然呼吸 ${breathingPattern.rest} 秒`, duration: breathingPattern.rest * 1000 });
+                }
+                
+                const currentIndex = states.findIndex(s => s.state === breathingState);
+                const nextIndex = (currentIndex + 1) % states.length;
+                
+                updateBreathingState(states[nextIndex]);
+            }, state.duration);
+        }
+        
+        // 结束会话
+        function endSession() {
+            isSessionActive = false;
+            
+            // 清除所有计时器
+            clearInterval(breathingInterval);
+            clearInterval(countdownInterval);
+            clearTimeout(sessionTimer);
+            
+            // 重置状态
+            breathingState = 'ready';
+            breathText.textContent = '准备开始';
+            breathInstructions.textContent = '跟随圆圈的节奏，放松身心';
+            
+            // 重置按钮
+            startBtn.classList.remove('opacity-0', 'pointer-events-none');
+            pauseBtn.classList.add('opacity-0', 'pointer-events-none');
+            
+            // 重置动画
+            breathingCircle.style.animation = 'none';
+            
+            // 计算实际时长
+            const actualDuration = Math.round((Date.now() - sessionStartTime) / (1000 * 60));
+            
+            // 更新统计
+            updateStats(actualDuration);
+            
+            // 显示完成弹窗
+            completedMinutes.textContent = actualDuration;
+            showSessionModal();
+        }
+        
+        // 显示会话完成弹窗
+        function showSessionModal() {
+            sessionCompleteModal.classList.remove('opacity-0', 'pointer-events-none');
+            sessionCompleteModal.querySelector('.bg-white').classList.remove('scale-95');
+            sessionCompleteModal.querySelector('.bg-white').classList.add('scale-100');
+            
+            // 更新周进度
+            updateWeeklyProgress();
+        }
+        
+        // 关闭会话完成弹窗
+        function closeSessionModal() {
+            sessionCompleteModal.classList.add('opacity-0', 'pointer-events-none');
+            sessionCompleteModal.querySelector('.bg-white').classList.remove('scale-100');
+            sessionCompleteModal.querySelector('.bg-white').classList.add('scale-95');
+        }
+        
+        // 分享会话
+        function shareSession() {
+            const minutes = completedMinutes.textContent;
+            
+            // 检查是否支持分享API
+            if (navigator.share) {
+                navigator.share({
+                    title: '正念呼吸练习',
+                    text: `我刚刚完成了 ${minutes} 分钟的正念呼吸练习，感觉平静而专注。一起来体验吧！`,
+                    url: window.location.href
+                });
+            } else {
+                // 复制到剪贴板
+                const text = `我刚刚完成了 ${minutes} 分钟的正念呼吸练习，感觉平静而专注。一起来体验吧！`;
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('已复制到剪贴板');
+                });
+            }
+            
+            // 关闭弹窗
+            closeSessionModal();
+        }
+        
+        // 切换设置面板
+        function toggleSettings() {
+            settingsPanel.classList.toggle('active');
+        }
+        
+        // 切换统计面板
+        function toggleStats() {
+            statsPanel.classList.toggle('active');
+            
+            // 如果面板打开，更新图表
+            if (statsPanel.classList.contains('active')) {
+                updateChart();
+            }
+        }
+        
+        // 保存设置
+        function saveSettings() {
+            const settings = {
+                mode: currentMode,
+                breathingPattern: breathingPattern,
+                sessionDuration: sessionDuration / (60 * 1000),
+                soundEnabled: soundEnabled,
+                soundVolume: soundVolume
+            };
+            
+            // 保存到本地存储
+            localStorage.setItem('mindfulBreathingSettings', JSON.stringify(settings));
+            
+            // 关闭设置面板
+            toggleSettings();
+            
+            // 显示提示
+            showToast('设置已保存');
+        }
+        
+        // 加载设置
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('mindfulBreathingSettings');
+            
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                // 更新模式
+                currentMode = settings.mode || '478';
+                
+                // 更新呼吸模式按钮
+                document.querySelectorAll('.breathing-mode-btn').forEach(btn => {
+                    if (btn.dataset.mode === currentMode) {
+                        btn.click();
+                    }
+                });
+                
+                // 更新呼吸模式
+                breathingPattern = settings.breathingPattern || {
+                    inhale: 4,
+                    hold: 7,
+                    exhale: 8,
+                    rest: 0
+                };
+                
+                // 更新自定义设置
+                if (currentMode === 'custom') {
+                    document.getElementById('customInhale').value = breathingPattern.inhale;
+                    document.getElementById('customHold').value = breathingPattern.hold;
+                    document.getElementById('customExhale').value = breathingPattern.exhale;
+                    document.getElementById('customRest').value = breathingPattern.rest;
+                }
+                
+                // 更新会话时长
+                sessionDuration = (settings.sessionDuration || 5) * 60 * 1000;
+                sessionDurationSlider.value = settings.sessionDuration || 5;
+                sessionDurationValue.textContent = settings.sessionDuration || 5;
+                
+                // 更新音效
+                soundEnabled = settings.soundEnabled || 'ocean';
+                document.querySelectorAll('.sound-btn').forEach(btn => {
+                    if (btn.dataset.sound === soundEnabled) {
+                        btn.click();
+                    }
+                });
+                
+                // 更新音量
+                soundVolume = settings.soundVolume || 50;
+                soundVolumeSlider.value = soundVolume;
+                soundVolumeValue.textContent = soundVolume + '%';
+            }
+        }
+        
+        // 更新统计
+        function updateStats(minutes) {
+            // 获取今天的日期
+            const today = new Date().toDateString();
+            
+            // 获取保存的统计数据
+            const savedStats = localStorage.getItem('mindfulBreathingStats');
+            const savedLastDate = localStorage.getItem('mindfulBreathingLastDate');
+            
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
+                
+                // 检查是否是新的一天
+                if (savedLastDate !== today) {
+                    // 重置今日统计
+                    stats.today = {
+                        sessions: 0,
+                        minutes: 0
+                    };
+                    
+                    // 更新连续天数
+                    const lastDate = new Date(savedLastDate);
+                    const currentDate = new Date();
+                    const diffTime = Math.abs(currentDate - lastDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays === 1) {
+                        // 连续天数 +1
+                        stats.streak += 1;
+                    } else if (diffDays > 1) {
+                        // 连续天数重置
+                        stats.streak = 1;
+                    }
+                    
+                    // 更新每日数据
+                    stats.dailyData.shift();
+                    stats.dailyData.push(0);
+                }
+            }
+            
+            // 更新统计
+            stats.today.sessions += 1;
+            stats.today.minutes += minutes;
+            stats.week.sessions += 1;
+            stats.week.minutes += minutes;
+            stats.total.sessions += 1;
+            stats.total.minutes += minutes;
+            
+            // 更新今日数据
+            stats.dailyData[6] += minutes;
+            
+            // 保存统计数据
+            localStorage.setItem('mindfulBreathingStats', JSON.stringify(stats));
+            localStorage.setItem('mindfulBreathingLastDate', today);
+            
+            // 更新显示
+            updateStatsDisplay();
+            updateChart();
+        }
+        
+        // 加载统计数据
+        function loadStats() {
+            const savedStats = localStorage.getItem('mindfulBreathingStats');
+            const savedLastDate = localStorage.getItem('mindfulBreathingLastDate');
+            const today = new Date().toDateString();
+            
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
+                
+                // 检查是否是新的一天
+                if (savedLastDate !== today) {
+                    // 重置今日统计
+                    stats.today = {
+                        sessions: 0,
+                        minutes: 0
+                    };
+                    
+                    // 更新连续天数
+                    if (savedLastDate) {
+                        const lastDate = new Date(savedLastDate);
+                        const currentDate = new Date();
+                        const diffTime = Math.abs(currentDate - lastDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays === 1) {
+                            // 连续天数 +1
+                            stats.streak += 1;
+                        } else if (diffDays > 1) {
+                            // 连续天数重置
+                            stats.streak = 1;
+                        }
+                    } else {
+                        stats.streak = 1;
+                    }
+                    
+                    // 更新每日数据
+                    stats.dailyData.shift();
+                    stats.dailyData.push(0);
+                    
+                    // 保存更新后的统计数据
+                    localStorage.setItem('mindfulBreathingStats', JSON.stringify(stats));
+                    localStorage.setItem('mindfulBreathingLastDate', today);
+                }
+            } else {
+                // 初始化统计数据
+                stats = {
+                    today: {
+                        sessions: 0,
+                        minutes: 0
+                    },
+                    week: {
+                        sessions: 0,
+                        minutes: 0
+                    },
+                    total: {
+                        sessions: 0,
+                        minutes: 0
+                    },
+                    streak: 1,
+                    dailyData: Array(7).fill(0)
+                };
+                
+                // 保存统计数据
+                localStorage.setItem('mindfulBreathingStats', JSON.stringify(stats));
+                localStorage.setItem('mindfulBreathingLastDate', today);
+            }
+        }
+        
+        // 更新统计显示
+        function updateStatsDisplay() {
+            document.getElementById('todaySessions').textContent = stats.today.sessions;
+            document.getElementById('todayMinutes').textContent = stats.today.minutes + ' 分钟';
+            document.getElementById('weekSessions').textContent = stats.week.sessions;
+            document.getElementById('weekMinutes').textContent = stats.week.minutes + ' 分钟';
+            document.getElementById('totalSessions').textContent = stats.total.sessions;
+            document.getElementById('totalMinutes').textContent = stats.total.minutes + ' 分钟';
+            document.getElementById('streakDays').textContent = stats.streak;
+            
+            // 更新成就
+            updateAchievements();
+        }
+        
+        // 更新成就
+        function updateAchievements() {
+            const achievements = document.querySelectorAll('.achievement');
+            
+            // 初学者：完成5次练习
+            if (stats.total.sessions >= 5) {
+                achievements[0].classList.remove('opacity-50');
+            }
+            
+            // 坚持一周：连续7天练习
+            if (stats.streak >= 7) {
+                achievements[1].classList.remove('opacity-50');
+            }
+            
+            // 专注大师：累计练习3小时
+            if (stats.total.minutes >= 180) {
+                achievements[2].classList.remove('opacity-50');
+            }
+            
+            // 冥想达人：完成30次练习
+            if (stats.total.sessions >= 30) {
+                achievements[3].classList.remove('opacity-50');
+            }
+        }
+        
+        // 初始化图表
+        function initChart() {
+            const ctx = weeklyChart.getContext('2d');
+            
+            // 创建图表
+            window.weeklyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: getLast7Days(),
+                    datasets: [{
+                        label: '练习时长（分钟）',
+                        data: stats.dailyData,
+                        backgroundColor: '#3B82F6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新图表
+        function updateChart() {
+            if (window.weeklyChartInstance) {
+                window.weeklyChartInstance.data.labels = getLast7Days();
+                window.weeklyChartInstance.data.datasets[0].data = stats.dailyData;
+                window.weeklyChartInstance.update();
+            }
+        }
+        
+        // 获取最近7天的日期
+        function getLast7Days() {
+            const days = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                days.push(date.getDate() + '日');
+            }
+            
+            return days;
+        }
+        
+        // 更新周进度
+        function updateWeeklyProgress() {
+            // 计算本周练习天数
+            const activeDays = stats.dailyData.filter(day => day > 0).length;
+            
+            // 更新文本
+            document.getElementById('weeklyProgress').textContent = activeDays + '/7 天';
+            
+            // 更新进度条
+            const progress = (activeDays / 7) * 100;
+            document.getElementById('weeklyProgressBar').style.width = progress + '%';
+        }
+        
+        // 显示提示
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.remove('opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
